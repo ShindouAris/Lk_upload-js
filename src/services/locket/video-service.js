@@ -55,7 +55,7 @@ const thumbnailData = async (
                     logInfo("thumbnailData", err);
                 })
                 .screenshots({
-                    timestamps: ["50%"],
+                    timestamps: ["00:00:01"],
                     filename: path.basename(tempFilePath),
                     folder: path.join(__dirname, "thumbnails"),
                     size: `${maxWidth}x?`,
