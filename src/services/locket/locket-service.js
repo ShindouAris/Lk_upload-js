@@ -3,7 +3,7 @@ const fs = require("fs");
 const { logInfo, logError } = require("../logger.service.js");
 const crypto = require("crypto");
 
-const videoService = require("./video-service.js");
+const { thumbnailData, encodeVideoToMp4 } = require("./video-service.js");
 const { decryptLoginData } = require("./security-service.js");
 
 const login = async (email, password) => {
@@ -196,8 +196,8 @@ const getMd5Hash = (str) => {
 
 const uploadThumbnailFromVideo = async (userId, idToken, video) => {
     try {
-        const thumbnailBytes = await videoService.thumbnailData(
-            video.path,
+        const thumbnailBytes = await thumbnailData(
+            video,
             "jpeg",
             128,
             75
@@ -419,11 +419,15 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption) => {
 const postVideo = async (userId, idToken, video, caption) => {
     try {
         logInfo("postVideo", "Start");
-        const videoAsBuffer = fs.readFileSync(video.path);
+
+        const encoded_video = await encodeVideoToMp4(video.path)
+
+        const videoAsBuffer = fs.readFileSync(encoded_video);
+
         const thumbnailUrl = await uploadThumbnailFromVideo(
             userId,
             idToken,
-            video
+            encoded_video
         );
 
         if (!thumbnailUrl) {
@@ -442,12 +446,13 @@ const postVideo = async (userId, idToken, video, caption) => {
 
         await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption);
 
+        fs.unlinkSync(encoded_video)
         logInfo("postVideo", "End");
     } catch (error) {
         logError("postVideo", error.message);
         throw error;
     } finally {
-        fs.unlinkSync(video.path);
+        logInfo("Cleaning up", "Finish");
     }
 };
 

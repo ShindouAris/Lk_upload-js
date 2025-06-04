@@ -17,6 +17,32 @@ const unlinkFile = (filePath) => {
     });
 };
 
+const encodeVideoToMp4 = (inputPath) => {
+    return new Promise((resolve, reject) => {
+        const outputPath = inputPath.replace(/\.webm$/, ".mp4");
+
+        ffmpeg(inputPath)
+            .outputOptions([
+                "-c:v libx264",
+                "-pix_fmt yuv420p",
+                "-movflags +faststart",
+            ])
+            .on("end", () => {
+                try {
+                    unlinkFile(inputPath);
+                }
+                catch (err) {
+                    logError("unlinkFile", err);
+                }
+                resolve(outputPath);
+            })
+            .on("error", (err) => {
+                reject(err);
+            })
+            .save(outputPath);
+    });
+}
+
 const thumbnailData = async (
     videoPath,
     imageFormat = "jpeg",
@@ -55,7 +81,7 @@ const thumbnailData = async (
                     logInfo("thumbnailData", err);
                 })
                 .screenshots({
-                    timestamps: ["00:00:01"],
+                    timestamps: ["50%"],
                     filename: path.basename(tempFilePath),
                     folder: path.join(__dirname, "thumbnails"),
                     size: `${maxWidth}x?`,
@@ -70,4 +96,5 @@ const thumbnailData = async (
 
 module.exports = {
     thumbnailData,
+    encodeVideoToMp4,
 };
