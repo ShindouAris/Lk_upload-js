@@ -1,8 +1,4 @@
-import router from "./locket.route";
-
 const Router = require('express')
-const req = require("express/lib/request");
-const res = require("express/lib/response");
 
 const route = new Router();
 
@@ -920,4 +916,4 @@ route.get("/themes", get_themes)
 route.get("/donations", get_donations)
 route.get("/timelines", get_timelines)
 
-module.exports = router;
+module.exports = route;
