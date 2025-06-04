@@ -19,7 +19,7 @@ const app = express();
 app.use(
     cors({
         methods: ["GET", "POST"], 
-        origin: ["*"],
+        origin: ["https://locket-kanade.chisadin.site"],
 
         // Nhằm cho phép client gửi cookie lên server
         credentials: true,
