@@ -4,8 +4,15 @@ class LocketController {
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
-            const user = await locketService.login(email, password);
-            return res.status(200).json({ user });
+            const userData = await locketService.login(email, password);
+            
+            // Return the data in the expected format
+            return res.status(200).json({
+                idToken: userData.idToken,
+                refreshToken: userData.refreshToken,
+                localId: userData.localId,
+                ...userData
+            });
         } catch (error) {
             next(error);
         }

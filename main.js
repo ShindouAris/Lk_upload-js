@@ -19,6 +19,7 @@ const app = express();
 app.use(
     cors({
         methods: ["GET", "POST"], 
+        origin: ["*"],
 
         // Nhằm cho phép client gửi cookie lên server
         credentials: true,
