@@ -2,18 +2,35 @@ const locketService = require("../services/locket/locket-service.js");
 const {logInfo} = require("../services/logger.service");
 
 class LocketController {
+
+
+
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
             const userData = await locketService.login(email, password);
+            const additional_data = await locketService.add_data(userData.localId, userData.idToken);
             
             // Return the data in the expected format
             return res.status(200).json({
                 idToken: userData.idToken,
                 refreshToken: userData.refreshToken,
                 localId: userData.localId,
-                ...userData
+                ...userData,
+                ...additional_data
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getFriends(req, res, next) {
+        try {
+            logInfo("getFriends Locket", "Start");
+            const { idToken, localId } = req.body;
+            const friendlist = await locketService.getFriends(localId, idToken)
+            logInfo("getFriends Locket", "End");
+            return res.status(200).json(friendlist)
         } catch (error) {
             next(error);
         }

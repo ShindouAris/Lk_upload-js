@@ -899,7 +899,7 @@ const notification = {
     "notifications": [
         {
             "id": 1,
-            "message": "Thông báo từ Admin\nHiện tại web đang deploy trên nền tảng free nên sẽ hạn chế băng thông.",
+            "message": "Thông báo từ Admin\nKanade xin chào các bạn",
             "created_at": "2025-05-22T06:21:02.070762+00:00"
         }
     ]
@@ -922,9 +922,14 @@ const get_donations = (req, res) => {
     return res.send(JSON.stringify(donations))
 }
 
+const get_notifications = (req, res) => {
+    return res.send(JSON.stringify(notification))
+}
+
 route.get("/user-themes/caption-posts", get_caption_posts)
 route.get("/themes", get_themes)
 route.get("/donations", get_donations)
 route.get("/timelines", get_timelines)
+route.get("/notification", get_notifications)
 
 module.exports = route;

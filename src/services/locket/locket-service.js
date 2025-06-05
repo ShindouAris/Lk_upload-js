@@ -6,6 +6,47 @@ const crypto = require("crypto");
 const { thumbnailData, encodeVideoToMp4 } = require("./video-service.js");
 const { decryptLoginData } = require("./security-service.js");
 
+// User data interaction
+
+const add_data = async (localId, idToken) => {
+    try {
+        const response = await fetch(constants.FETCH_ADDITONAL_DATA(localId), {
+            method: "GET",
+            headers: constants.FETCH_FRIEND_HEADER(idToken)
+        })
+        const rawData = await response.json();
+
+        const res = await fetch("https://api.locketcamera.com/fetchUserV2", {
+            method: "POST",
+            headers: constants.FETCH_FRIEND_HEADER(idToken),
+            body: JSON.stringify( {
+                data: {
+                    user_uid: localId
+                }
+            })
+        })
+
+        const fectuserv2 = await res.json();
+        logInfo("Fetched user data", JSON.stringify(fectuserv2));
+        const { username, last_name } = fectuserv2.result?.data ?? {}
+
+        return {
+            uid: rawData.fields.uid.stringValue,
+            username: username || null,
+            firstName: rawData.fields.first_name?.stringValue || null,
+            lastName: last_name || null,
+            inviteToken: rawData.fields.invite_token?.stringValue || null,
+            lastFriendsChange: rawData.fields.last_friends_change?.timestampValue || null,
+            migratedAt: rawData.createTime || null,
+            createdAt: rawData.createTime || null
+        }
+    } catch (error) {
+        logError(error);
+        return null;
+    }
+}
+
+
 const login = async (email, password) => {
     logInfo("login Locket", "Start");
     const { decryptedEmail, decryptedPassword } = decryptLoginData(
@@ -31,7 +72,7 @@ const login = async (email, password) => {
             throw new Error(`Login failed: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json()
 
         logInfo("login Locket", "End");
         return data;
@@ -40,7 +81,6 @@ const login = async (email, password) => {
         throw error;
     }
 };
-
 
 const refreshToken = async (token) => {
     logInfo("Refresh Token", "start")
@@ -67,6 +107,46 @@ const refreshToken = async (token) => {
     }
 }
 
+const formatFriendListResponse = (data) => {
+    if (!data || !Array.isArray(data.documents)) {
+        return {
+            success: false,
+            message: "❌ Dữ liệu không hợp lệ!",
+            data: [],
+        };
+    }
+
+    const friends = data.documents.map(doc => {
+        const uid = doc.fields?.user?.stringValue || null;
+        const date = doc.createTime || null;
+        return uid && date ? { uid, date } : null;
+    }).filter(Boolean);
+
+    return {
+        success: true,
+        message: "✅ Lấy ds bạn bè thành công!",
+        data: friends,
+    };
+}
+
+const getFriends = async (userID, idtoken) => {
+    logInfo("getFriends Locket", "Start");
+    try {
+        const response = await fetch(constants.FETCH_FRIEND(userID), {
+            method: "GET",
+            headers: constants.FETCH_FRIEND_HEADER(idtoken)
+        });
+        if (!response.ok) {
+            throw new Error(`Fail to fetch friend: ${response.statusText}`);
+        }
+        const data = await response.json();
+        logInfo("getFriends Locket", "End");
+        return formatFriendListResponse(data);
+
+    } catch (error) {
+        logError("getFriends Locket", error.message);
+    }
+}
 
 //#region Image handlers
 
@@ -529,5 +609,7 @@ module.exports = {
     postImage,
     uploadVideoToFirebaseStorage,
     postVideo,
-    refreshToken
+    refreshToken,
+    getFriends,
+    add_data
 };

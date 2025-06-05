@@ -13,6 +13,10 @@ router.post(
     locketController.uploadMedia
 );
 
+router.post("/get-allFriends",
+    locketController.getFriends
+)
+
 router.post(
     "/refresh-token",
     locketController.refreshToken
