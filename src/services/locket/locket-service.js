@@ -317,8 +317,9 @@ const postImage = async (userId, idToken, image, caption, overlays) => {
             );
         }
         const data = await postResponse.json()
-        console.log(JSON.stringify(data.result?.data?.overlays));
+        
         logInfo("postImage", "End");
+        return data;
     } catch (error) {
         logError("postImage", error.message);
         throw error;
@@ -555,6 +556,7 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overl
         }
 
         logInfo("postVideoToLocket", "End");
+        return response.json();
     } catch (error) {
         logError("postVideoToLocket", error.message);
         throw error;
@@ -589,10 +591,11 @@ const postVideo = async (userId, idToken, video, caption, overlays) => {
             throw new Error("Failed to upload video");
         }
 
-        await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption, overlays);
+        const response = await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption, overlays);
 
         fs.unlinkSync(encoded_video)
         logInfo("postVideo", "End");
+        return response;
     } catch (error) {
         logError("postVideo", error.message);
         throw error;
