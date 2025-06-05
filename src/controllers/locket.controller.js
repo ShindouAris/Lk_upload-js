@@ -1,4 +1,5 @@
 const locketService = require("../services/locket/locket-service.js");
+const {logInfo} = require("../services/logger.service");
 
 class LocketController {
     async login(req, res, next) {
@@ -20,7 +21,7 @@ class LocketController {
 
     async uploadMedia(req, res, next) {
         try {
-            const { userId, idToken, caption } = req.body;
+            const { userId, idToken, caption, overlay } = req.body;
             const { images, videos } = req.files;
 
             if (!images && !videos) {
@@ -40,7 +41,8 @@ class LocketController {
                     userId,
                     idToken,
                     images[0],
-                    caption
+                    caption,
+                    overlay
                 );
             } else {
                 if (videos[0].size > 10 * 1024 * 1024) {
@@ -53,7 +55,8 @@ class LocketController {
                     userId,
                     idToken,
                     videos[0],
-                    caption
+                    caption,
+                    overlay
                 );
             }
 
@@ -63,6 +66,29 @@ class LocketController {
         } catch (error) {
             next(error);
         }
+    }
+
+
+    async refreshToken(req, res, next) {
+        const { refreshToken  } = req.body;
+
+        if (!refreshToken  ) {
+            return res.status(400).json({
+                message: "No refeshToken found",
+            })
+        }
+        try {
+            const refresh_data = await locketService.refreshToken(refreshToken);
+           return res.status(200).json({
+               success: true,
+               message: "Refresh Token successfully",
+               data: refresh_data}
+           )
+        } catch (error) {
+            next(error);
+        }
+
+
     }
 }
 

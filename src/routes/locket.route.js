@@ -13,4 +13,9 @@ router.post(
     locketController.uploadMedia
 );
 
+router.post(
+    "/refresh-token",
+    locketController.refreshToken
+)
+
 module.exports = router;

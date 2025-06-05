@@ -41,6 +41,33 @@ const login = async (email, password) => {
     }
 };
 
+
+const refreshToken = async (token) => {
+    logInfo("Refresh Token", "start")
+    const requestData = JSON.stringify({
+        grantType: 'refresh_token',
+        refreshToken: token
+    })
+    try {
+        const response = await fetch(constants.REFRESH_URL, {
+            method: "POST",
+            headers: constants.REFRESH_HEADERS,
+            body: requestData,
+        })
+        if (!response.ok) {
+            throw new Error(`Refresh Token failed: ${response.statusText}`);
+        }
+        const data = await response.json();
+        logInfo("refresh Locket", "End");
+        return data
+
+    } catch (error) {
+        logError("refresh Locket", error.message);
+        throw error;
+    }
+}
+
+
 //#region Image handlers
 
 /**
@@ -145,7 +172,7 @@ const uploadImageToFirebaseStorage = async (userId, idToken, image) => {
     }
 };
 
-const postImage = async (userId, idToken, image, caption) => {
+const postImage = async (userId, idToken, image, caption, overlays) => {
     try {
         logInfo("postImage", "Start");
         const imageUrl = await uploadImageToFirebaseStorage(
@@ -153,6 +180,7 @@ const postImage = async (userId, idToken, image, caption) => {
             idToken,
             image
         );
+        const {overlay_id, icon, text_color, color_top, color_bottom} = overlays;
 
         // Tạo bài viết mới
         const postHeaders = {
@@ -160,10 +188,39 @@ const postImage = async (userId, idToken, image, caption) => {
             Authorization: `Bearer ${idToken}`,
         };
 
+
         const postData = JSON.stringify({
             data: {
                 thumbnail_url: imageUrl,
                 caption: caption,
+                overlays: [
+                    {
+                        data: {
+                            text: caption,
+                            text_color: text_color,
+                            // type: type,
+                            max_lines: {
+                                "@type":
+                                    "type.googleapis.com/google.protobuf.Int64Value",
+                                value: "4",
+                            },
+                            icon: {
+                                data: icon,
+                                type: "emoji"
+                            },
+                            background: {
+                                material_blur: "regular",
+                                colors: [
+                                    color_top,
+                                    color_bottom,
+                                ],
+                            },
+                        },
+                        alt_text: caption,
+                        overlay_id: overlay_id,
+                        overlay_type: "caption",
+                    },
+                ],
                 sent_to_all: true,
             },
         });
@@ -179,7 +236,8 @@ const postImage = async (userId, idToken, image, caption) => {
                 `Failed to create post: ${postResponse.statusText}`
             );
         }
-
+        const data = await postResponse.json()
+        console.log(JSON.stringify(data.result?.data?.overlays));
         logInfo("postImage", "End");
     } catch (error) {
         logError("postImage", error.message);
@@ -294,12 +352,13 @@ const uploadVideoToFirebaseStorage = async (userId, idToken, video) => {
     }
 };
 
-const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption) => {
+const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overlays) => {
     try {
         const postHeaders = {
             "content-type": "application/json",
             authorization: `Bearer ${idToken}`,
         };
+        const {overlay_id, type, icon, text_color, color_top, color_bottom} = overlays;
 
         const data = {
             data: {
@@ -379,20 +438,26 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption) => {
                     {
                         data: {
                             text: caption,
-                            text_color: "#FFFFFFE6",
-                            type: "standard",
+                            text_color: text_color,
+                            type: "static_content",
                             max_lines: {
                                 "@type":
                                     "type.googleapis.com/google.protobuf.Int64Value",
                                 value: "4",
                             },
+                            icon: {
+                                data: icon,
+                                type: "emoji",
+                            },
                             background: {
-                                material_blur: "ultra_thin",
-                                colors: [],
+                                colors: [
+                                    color_top,
+                                    color_bottom,
+                                ]
                             },
                         },
                         alt_text: caption,
-                        overlay_id: "caption:standard",
+                        overlay_id: overlay_id,
                         overlay_type: "caption",
                     },
                 ],
@@ -416,7 +481,7 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption) => {
     }
 };
 
-const postVideo = async (userId, idToken, video, caption) => {
+const postVideo = async (userId, idToken, video, caption, overlays) => {
     try {
         logInfo("postVideo", "Start");
 
@@ -444,7 +509,7 @@ const postVideo = async (userId, idToken, video, caption) => {
             throw new Error("Failed to upload video");
         }
 
-        await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption);
+        await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption, overlays);
 
         fs.unlinkSync(encoded_video)
         logInfo("postVideo", "End");
@@ -464,4 +529,5 @@ module.exports = {
     postImage,
     uploadVideoToFirebaseStorage,
     postVideo,
+    refreshToken
 };

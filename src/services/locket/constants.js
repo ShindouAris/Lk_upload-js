@@ -30,6 +30,19 @@ const constants = {
             "com.locket.Locket/1.43.1 iPhone/17.3 hw/iPhone15_3 (GTMSUF/1)",
     },
     CREATE_POST_URL: "https://api.locketcamera.com/postMomentV2",
+    REFRESH_URL: "https://securetoken.googleapis.com/v1/token?key=AIzaSyB5dTd-xiLD5dEfWq5OpptnQtnMpE0W0u8",
+    REFRESH_HEADERS: {
+        "Accept-Encoding": "gzip",
+        "Accept-Language": "en-US",
+        "Connection": "keep-alive",
+        "Content-Length": "294",
+        "Content-Type": "application/json",
+        "Host": "securetoken.googleapis.com",
+        "User-Agent": "FirebaseAuth.iOS/10.23.1 com.locket.Locket/1.82.0 iPhone/18.0 hw/iPhone12_1",
+        "X-Android-Cert": "187A27D3D7364A044307F56E66230F973DCCD5B7",
+        "X-Android-Package": "com.locket.Locket",
+        "X-Firebase-Client": "H4sIAAAAAAAAAKtWykhNLCpJSk0sKVayio7VUSpLLSrOzM9TslIyUqoFAFyivEQfAAAA"
+    }
 };
 
 module.exports = constants;

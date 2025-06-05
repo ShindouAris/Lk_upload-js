@@ -895,6 +895,17 @@ const donations = [
     }
 ]
 
+const notification = {
+    "notifications": [
+        {
+            "id": 1,
+            "message": "Thông báo từ Admin\nHiện tại web đang deploy trên nền tảng free nên sẽ hạn chế băng thông.",
+            "created_at": "2025-05-22T06:21:02.070762+00:00"
+        }
+    ]
+}
+
+
 const get_caption_posts = (req, res) => {
     return res.send(JSON.stringify(data))
 }
