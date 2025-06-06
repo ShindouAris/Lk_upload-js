@@ -27,7 +27,6 @@ const add_data = async (localId, idToken) => {
         })
 
         const fectuserv2 = await res.json();
-        logInfo("Fetched user data", JSON.stringify(fectuserv2));
         const { username, last_name } = fectuserv2.result?.data ?? {}
 
         return {
@@ -260,7 +259,6 @@ const postImage = async (userId, idToken, image, caption, overlays, options) => 
             idToken,
             image
         );
-        const {overlay_id, icon, text_color, color_top, color_bottom} = overlays;
 
         // Tạo bài viết mới
         const postHeaders = {

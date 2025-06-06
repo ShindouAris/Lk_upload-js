@@ -68,8 +68,6 @@ class LocketController {
             const options = typeof req.body.options === 'string' ? JSON.parse(req.body.options) : req.body.options;
             const overlay = typeof req.body.overlay === 'string' ? JSON.parse(req.body.overlay) : req.body.overlay;
 
-
-            logInfo("uploadMedia Locket", JSON.stringify(req.body));
             if (!images && !videos) {
                 return res.status(400).json({
                     message: "No media found",

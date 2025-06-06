@@ -373,9 +373,6 @@ const imagePostPayloadSpotify = ({ imageUrl, optionsData }) => {
 };
 
 const createImagePostPayload = ({ type, imageUrl, optionsData }) => {
-  logInfo("createImagePostPayload Locket", JSON.stringify({ type }));
-  logInfo("createImagePostPayload Locket", JSON.stringify({ optionsData }));
-  logInfo("createImagePostPayload Locket", JSON.stringify({ imageUrl }));
   switch (type?.toLowerCase()) {
     case 'standard':
     case 'default':
