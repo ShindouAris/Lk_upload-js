@@ -1,6 +1,7 @@
 const locketService = require("../services/locket/locket-service.js");
 const {logInfo} = require("../services/logger.service");
 const {createImagePostPayload} = require("../services/locket/imagePostPayload.js")
+const turnstileService = require("../services/turnstile.service.js");
 
 
 class LocketController {
@@ -9,7 +10,28 @@ class LocketController {
 
     async login(req, res, next) {
         try {
-            const { email, password } = req.body;
+            const { email, password, turnstileToken } = req.body;
+
+            // Only validate Turnstile if it's enabled
+            if (turnstileService.isEnabled) {
+                if (!turnstileToken) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Turnstile token is required"
+                    });
+                }
+
+                try {
+                    await turnstileService.verifyToken(turnstileToken);
+                } catch (error) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Turnstile validation failed"
+                    });
+                }
+            }
+
+            // Proceed with login after successful validation
             const userData = await locketService.login(email, password);
             const additional_data = await locketService.add_data(userData.localId, userData.idToken);
             
