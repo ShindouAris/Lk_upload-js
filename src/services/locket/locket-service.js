@@ -2,7 +2,7 @@ const constants = require("./constants");
 const fs = require("fs");
 const { logInfo, logError } = require("../logger.service.js");
 const crypto = require("crypto");
-
+const { createImagePostPayload } = require("./imagePostPayload.js");
 const { thumbnailData, encodeVideoToMp4 } = require("./video-service.js");
 const { decryptLoginData } = require("./security-service.js");
 
@@ -252,7 +252,7 @@ const uploadImageToFirebaseStorage = async (userId, idToken, image) => {
     }
 };
 
-const postImage = async (userId, idToken, image, caption, overlays) => {
+const postImage = async (userId, idToken, image, caption, overlays, options) => {
     try {
         logInfo("postImage", "Start");
         const imageUrl = await uploadImageToFirebaseStorage(
@@ -268,40 +268,20 @@ const postImage = async (userId, idToken, image, caption, overlays) => {
             Authorization: `Bearer ${idToken}`,
         };
 
+        const over_lay_payload = createImagePostPayload({
+            type: options.type,
+            imageUrl: imageUrl,
+            optionsData: options
+        })
 
+        
         const postData = JSON.stringify({
             data: {
                 thumbnail_url: imageUrl,
                 caption: caption,
-                overlays: [
-                    {
-                        data: {
-                            text: caption,
-                            text_color: text_color,
-                            // type: type,
-                            max_lines: {
-                                "@type":
-                                    "type.googleapis.com/google.protobuf.Int64Value",
-                                value: "4",
-                            },
-                            icon: {
-                                data: icon,
-                                type: "emoji"
-                            },
-                            background: {
-                                material_blur: "regular",
-                                colors: [
-                                    color_top,
-                                    color_bottom,
-                                ],
-                            },
-                        },
-                        alt_text: caption,
-                        overlay_id: overlay_id,
-                        overlay_type: "caption",
-                    },
-                ],
-                sent_to_all: true,
+                overlays: over_lay_payload,
+                show_personally: false,
+                recipients: options.recipients || [],
             },
         });
 
@@ -433,20 +413,23 @@ const uploadVideoToFirebaseStorage = async (userId, idToken, video) => {
     }
 };
 
-const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overlays) => {
+const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overlays, options) => {
     try {
         const postHeaders = {
             "content-type": "application/json",
             authorization: `Bearer ${idToken}`,
         };
-        const {overlay_id, type, icon, text_color, color_top, color_bottom} = overlays;
-
+        const over_lay_payload = createImagePostPayload({
+            type: options.type,
+            imageUrl: thumbnailUrl,
+            optionsData: options
+        })
         const data = {
             data: {
                 thumbnail_url: thumbnailUrl,
                 video_url: videoUrl,
                 md5: getMd5Hash(videoUrl),
-                recipients: [],
+                recipients: options.recipients || [],
                 analytics: {
                     experiments: {
                         flag_4: {
@@ -513,35 +496,9 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overl
                     },
                     platform: "ios",
                 },
-                sent_to_all: true,
                 caption: caption,
-                overlays: [
-                    {
-                        data: {
-                            text: caption,
-                            text_color: text_color,
-                            type: "static_content",
-                            max_lines: {
-                                "@type":
-                                    "type.googleapis.com/google.protobuf.Int64Value",
-                                value: "4",
-                            },
-                            icon: {
-                                data: icon,
-                                type: "emoji",
-                            },
-                            background: {
-                                colors: [
-                                    color_top,
-                                    color_bottom,
-                                ]
-                            },
-                        },
-                        alt_text: caption,
-                        overlay_id: overlay_id,
-                        overlay_type: "caption",
-                    },
-                ],
+                overlays: over_lay_payload,
+                show_personally: false,
             },
         };
 
@@ -563,7 +520,7 @@ const postVideoToLocket = async (idToken, videoUrl, thumbnailUrl, caption, overl
     }
 };
 
-const postVideo = async (userId, idToken, video, caption, overlays) => {
+const postVideo = async (userId, idToken, video, caption, overlays, options) => {
     try {
         logInfo("postVideo", "Start");
 
@@ -591,7 +548,7 @@ const postVideo = async (userId, idToken, video, caption, overlays) => {
             throw new Error("Failed to upload video");
         }
 
-        const response = await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption, overlays);
+        const response = await postVideoToLocket(idToken, videoUrl, thumbnailUrl, caption, overlays, options);
 
         fs.unlinkSync(encoded_video)
         logInfo("postVideo", "End");

@@ -1,5 +1,7 @@
 const locketService = require("../services/locket/locket-service.js");
 const {logInfo} = require("../services/logger.service");
+const {createImagePostPayload} = require("../services/locket/imagePostPayload.js")
+
 
 class LocketController {
 
@@ -38,9 +40,14 @@ class LocketController {
 
     async uploadMedia(req, res, next) {
         try {
-            const { userId, idToken, caption, overlay } = req.body;
+            const { userId, idToken, caption } = req.body;
             const { images, videos } = req.files;
+            
+            const options = typeof req.body.options === 'string' ? JSON.parse(req.body.options) : req.body.options;
+            const overlay = typeof req.body.overlay === 'string' ? JSON.parse(req.body.overlay) : req.body.overlay;
 
+
+            logInfo("uploadMedia Locket", JSON.stringify(req.body));
             if (!images && !videos) {
                 return res.status(400).json({
                     message: "No media found",
@@ -52,14 +59,14 @@ class LocketController {
                     message: "Only one type of media is allowed",
                 });
             }
-
             if (images) {
                 const response = await locketService.postImage(
                     userId,
                     idToken,
                     images[0],
                     caption,
-                    overlay
+                    overlay,
+                    options
                 );
                 return res.status(200).json({
                     message: "Upload image successfully",
@@ -77,7 +84,8 @@ class LocketController {
                     idToken,
                     videos[0],
                     caption,
-                    overlay
+                    overlay,
+                    options
                 );
                 return res.status(200).json({
                     message: "Upload video successfully",
