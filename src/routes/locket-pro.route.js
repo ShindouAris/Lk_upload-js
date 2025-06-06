@@ -551,6 +551,12 @@ const theme = [
 
 const timeline = [
     {
+        "id": 31,
+        "date": "2025-06-06",
+        "title": "Nâng cấp API",
+        "description": "Có được các endpoint quan trọng của locket, tôi tiến hành cải tiến hệ thống Backend",
+    },
+    {
         "id": 30,
         "date": "2025-06-04",
         "title": "Kanade đã patch Locket Dio",
