@@ -5,11 +5,6 @@ const decryptLoginData = (encryptedEmail, encryptedPassword) => {
     try {
         logInfo("decryptLoginData", "Start decrypting login data");
         const secretKey = process.env.HASH_SECRET_KEY || 'default-key';
-
-        logInfo("decryptLoginData", `Using key: ${secretKey}`);
-        logInfo("decryptLoginData", `Encrypted email: ${encryptedEmail}`);
-        logInfo("decryptLoginData", `Encrypted password: ${encryptedPassword}`);
-
         // Decrypt with same configuration as encryption
         const decryptedEmail = CryptoJS.AES.decrypt(encryptedEmail, secretKey, {
             mode: CryptoJS.mode.ECB,
@@ -24,11 +19,6 @@ const decryptLoginData = (encryptedEmail, encryptedPassword) => {
         if (!decryptedEmail || !decryptedPassword) {
             throw new Error("Failed to decrypt login data - empty result");
         }
-
-        logInfo("decryptLoginData", `Decrypted email: ${decryptedEmail}`);
-        logInfo("decryptLoginData", `Decrypted password: ${decryptedPassword}`);
-        logInfo("decryptLoginData", "Decrypted login data successfully");
-
         return { decryptedEmail, decryptedPassword };
     } catch (error) {
         logError("decryptLoginData", `Decryption error: ${error.message}`);
