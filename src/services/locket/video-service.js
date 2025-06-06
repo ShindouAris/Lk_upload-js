@@ -23,9 +23,8 @@ const encodeVideoToMp4 = (inputPath) => {
 
         ffmpeg(inputPath)
             .outputOptions([
-                "-c:v libx264",
-                "-pix_fmt yuv420p",
-                "-movflags +faststart",
+                "-c copy",
+                "-movflags +faststart"
             ])
             .on("end", () => {
                 try {
@@ -41,7 +40,7 @@ const encodeVideoToMp4 = (inputPath) => {
             })
             .save(outputPath);
     });
-}
+};
 
 const thumbnailData = async (
     videoPath,
