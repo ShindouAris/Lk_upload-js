@@ -553,8 +553,8 @@ const timeline = [
     {
         "id": 30,
         "date": "2025-06-04",
-        "title": "Kanade đã crack Locket Dio",
-        "description": "Kanade đã crack Locket Dio, Limit la cai deo j"
+        "title": "Kanade đã patch Locket Dio",
+        "description": "Kanade đã patch Locket Dio, các limit đã được loại bỏ"
     },
     {
         "id": 29,
