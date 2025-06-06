@@ -13,8 +13,8 @@ class LocketController {
             const { email, password, turnstileToken } = req.body;
 
             // Only validate Turnstile if it's enabled
-            if (turnstileService.isEnabled) {
-                if (!turnstileToken) {
+            if (turnstileService.isEnabled && turnstileService.secretKey) {
+                if (typeof turnstileToken !== 'string' || !turnstileToken.trim()) {
                     return res.status(400).json({
                         success: false,
                         message: "Turnstile token is required"
