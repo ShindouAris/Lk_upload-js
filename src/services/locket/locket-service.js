@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { createImagePostPayload } = require("./imagePostPayload.js");
 const { thumbnailData, encodeVideoToMp4 } = require("./video-service.js");
 const { decryptLoginData } = require("./security-service.js");
+const compressImageSharp = require("../image-service.js");
 
 // User data interaction
 
@@ -254,10 +255,19 @@ const uploadImageToFirebaseStorage = async (userId, idToken, image) => {
 const postImage = async (userId, idToken, image, caption, overlays, options) => {
     try {
         logInfo("postImage", "Start");
+        const outputPath = `compressed_${Date.now()}.webp`;
+        let finalImagePath = image.path;
+
+        try {
+            finalImagePath = await compressImageSharp(image.path, outputPath);
+        } catch (error) {
+            logError("postImage", `Nén ảnh thất bại: ${error.message}`);
+        }
+        
         const imageUrl = await uploadImageToFirebaseStorage(
             userId,
             idToken,
-            image
+            { path: finalImagePath }
         );
 
         // Tạo bài viết mới
