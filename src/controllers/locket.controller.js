@@ -93,9 +93,11 @@ class LocketController {
                     data: response
                 });
             } else {
-                if (videos[0].size > 10 * 1024 * 1024) {
+                if (videos[0].size > 25 * 1024 * 1024) {
+                    logInfo("uploadMedia", "Video size exceeds 25MB - We cant compress it");
+                    fs.unlinkSync(videos[0].path); // Unlink the file so we dont get cooked by the massive upload 💀
                     return res.status(400).json({
-                        message: "Video size exceeds 10MB",
+                        message: "Video size exceeds 25MB - this ain't youtube bro",
                     });
                 }
 

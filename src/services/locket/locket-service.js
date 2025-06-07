@@ -1,5 +1,6 @@
 const constants = require("./constants");
 const fs = require("fs");
+const path = require("path");
 const { logInfo, logError } = require("../logger.service.js");
 const crypto = require("crypto");
 const { createImagePostPayload } = require("./imagePostPayload.js");
@@ -532,9 +533,10 @@ const postVideo = async (userId, idToken, video, caption, overlays, options) => 
     try {
         logInfo("postVideo", "Start");
 
-        const compressed_video_name = `compressed_${Date.now()}.mp4`;
-        const compressed_video_path = await compressVideo(video.path, compressed_video_name);
+        const videosDir = path.resolve(__dirname, "..", "..", "..", "uploads", "videos");
 
+        const compressed_video_name = path.join(videosDir, `compressed_${Date.now()}.mp4`);
+        const compressed_video_path = await compressVideo(video.path, compressed_video_name);
         const encoded_video = await encodeVideoToMp4(compressed_video_path)
 
         const videoAsBuffer = fs.readFileSync(encoded_video);

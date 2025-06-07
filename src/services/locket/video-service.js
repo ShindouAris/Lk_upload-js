@@ -42,8 +42,6 @@ const encodeVideoToMp4 = (inputPath) => {
     });
 };
 
-// TESING COMPRESS VIDEO
-
 const compressVideo = async (inputPath, outputPath) => {
     logInfo("compressVideo", "Compressing video...");
     const videoSize = fs.statSync(inputPath).size;
@@ -53,29 +51,39 @@ const compressVideo = async (inputPath, outputPath) => {
         logInfo("compressVideo", "Video đã nhỏ hơn 10MB, không cần nén");
         return inputPath;
     }
-    try {
-        ffmpeg(inputPath)
-    .videoCodec('libx264')
-    .outputOptions([
-        '-crf 28',
-        '-preset veryfast' 
-    ])
-    .on('start', cmd => console.log('Started:', cmd))
-    .on('progress', progress => {
-        logInfo("compressVideo", `Processing: ${progress.percent.toFixed(2)}%`);
-    })
-    .on('end', () => {
-        logInfo("compressVideo", "Finished encoding");
-        unlinkFile(inputPath);
-    })
-    .on('error', err => console.error('Error:', err))
-    .save(outputPath);
 
-    return outputPath;
-    } catch (error) {
-        logError("compressVideo", error);
-        return inputPath; // Something went wrong, return the original video path
-    }
+    return new Promise((resolve, reject) => {
+        try {
+            ffmpeg(inputPath)
+                .videoCodec('libx264')
+                .outputOptions([
+                    '-crf 28',
+                    '-preset veryfast'
+                ])
+                .on('start', cmd => logInfo("compressVideo", `Started: ${cmd}`))
+                .on('end', () => {
+                    logInfo("compressVideo", `Video size after compression: ${fs.statSync(outputPath).size / 1024 / 1024} MB`);
+                    logInfo("compressVideo", "Finished encoding");
+                    unlinkFile(inputPath);
+                    
+                    if (fs.statSync(outputPath).size > 10 * 1024 * 1024) {
+                        logInfo("compressVideo", "Video size exceeds 10MB");
+                        unlinkFile(outputPath);
+                        reject(new Error("Video size exceeds 10MB"));
+                    } else {
+                        resolve(outputPath);
+                    }
+                })
+                .on('error', err => {
+                    logError("compressVideo", err);
+                    reject(err);
+                })
+                .save(outputPath);
+        } catch (error) {
+            logError("compressVideo", error);
+            reject(error);
+        }
+    });
 }
 
 const thumbnailData = async (
