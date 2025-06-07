@@ -553,7 +553,7 @@ const timeline = [
     {
         "id": 31,
         "date": "2025-06-06",
-        "title": "Nâng cấp API",
+        "title": "Nâng cấp Backend",
         "description": "Có được các endpoint quan trọng của locket, tôi tiến hành cải tiến hệ thống Backend",
     },
     {
