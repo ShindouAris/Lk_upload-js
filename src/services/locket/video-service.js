@@ -42,6 +42,42 @@ const encodeVideoToMp4 = (inputPath) => {
     });
 };
 
+// TESING COMPRESS VIDEO
+
+const compressVideo = async (inputPath, outputPath) => {
+    logInfo("compressVideo", "Compressing video...");
+    const videoSize = fs.statSync(inputPath).size;
+    logInfo("compressVideo", `Video size: ${videoSize / 1024 / 1024} MB`);
+    
+    if (videoSize < 10 * 1024 * 1024) {
+        logInfo("compressVideo", "Video đã nhỏ hơn 10MB, không cần nén");
+        return inputPath;
+    }
+    try {
+        ffmpeg(inputPath)
+    .videoCodec('libx264')
+    .outputOptions([
+        '-crf 28',
+        '-preset veryfast' 
+    ])
+    .on('start', cmd => console.log('Started:', cmd))
+    .on('progress', progress => {
+        logInfo("compressVideo", `Processing: ${progress.percent.toFixed(2)}%`);
+    })
+    .on('end', () => {
+        logInfo("compressVideo", "Finished encoding");
+        unlinkFile(inputPath);
+    })
+    .on('error', err => console.error('Error:', err))
+    .save(outputPath);
+
+    return outputPath;
+    } catch (error) {
+        logError("compressVideo", error);
+        return inputPath; // Something went wrong, return the original video path
+    }
+}
+
 const thumbnailData = async (
     videoPath,
     imageFormat = "jpeg",
@@ -96,4 +132,5 @@ const thumbnailData = async (
 module.exports = {
     thumbnailData,
     encodeVideoToMp4,
+    compressVideo
 };
