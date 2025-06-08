@@ -18,7 +18,7 @@ const errorHandler = require("./src/helpers/error-handler.js");
 const app = express();
 app.use(
     cors({
-        methods: ["GET", "POST"], 
+        methods: ["GET", "POST", "HEAD"], 
         origin: ["https://locket-kanade.chisadin.site", "http://localhost:5173"],
 
         // Nhằm cho phép client gửi cookie lên server
