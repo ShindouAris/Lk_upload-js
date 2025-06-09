@@ -14,10 +14,10 @@ const stat = async (req, res) => {
         const mem = await si.mem();
     
         res.json({
-          vcpu: cpuLoad.cpus.length, 
-          cpuUsage: cpuLoad.currentLoad.toFixed(2), 
-          freeRAM: (mem.available / 1024 / 1024).toFixed(2), 
-          totalRAM: (mem.total / 1024 / 1024).toFixed(2), 
+          vcpu: process.env.VCPU_LIMIT || cpuLoad.cpus.length,
+          cpuUsage: cpuLoad.currentLoad.toFixed(2),
+          freeRAM: (mem.available / 1024 / 1024).toFixed(2),
+          totalRAM: process.env.RAM_LIMIT_MB || (mem.total / 1024 / 1024).toFixed(2),
         });
       } catch (err) {
         res.status(500).json({ error: 'System stat failed', details: err });
