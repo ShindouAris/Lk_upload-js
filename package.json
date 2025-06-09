@@ -30,7 +30,8 @@
     "multer": "^2.0.1",
     "node-request-context": "^1.0.5",
     "request-promise": "^4.2.6",
-    "sharp": "^0.34.2"
+    "sharp": "^0.34.2",
+    "systeminformation": "^5.27.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
