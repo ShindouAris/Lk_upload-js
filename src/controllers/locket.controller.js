@@ -1,12 +1,9 @@
 const locketService = require("../services/locket/locket-service.js");
 const {logInfo} = require("../services/logger.service");
-const {createImagePostPayload} = require("../services/locket/imagePostPayload.js")
 const turnstileService = require("../services/turnstile.service.js");
-
+const fs = require("fs");
 
 class LocketController {
-
-
 
     async login(req, res, next) {
         try {
@@ -80,6 +77,12 @@ class LocketController {
                 });
             }
             if (images) {
+                if (images[0].size > 10 * 1024 * 1024) {
+                    fs.unlinkSync(images[0].path);
+                    return res.status(400).json({
+                        message: "Image size exceeds 10MB",
+                    });
+                }
                 const response = await locketService.postImage(
                     userId,
                     idToken,
