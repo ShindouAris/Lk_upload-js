@@ -75,11 +75,11 @@ const compressVideo = async (inputPath, outputPath) => {
     const videoSize = fs.statSync(inputPath).size;
     logInfo("compressVideo", `Video size: ${(videoSize / 1024 / 1024).toFixed(2)} MB`);
     
-    if (videoSize < 10 * 1024 * 1024) {
-        logInfo("compressVideo", "Video đã nhỏ hơn 10MB, không cần nén");
+    if (videoSize < 5 * 1024 * 1024) {
+        logInfo("compressVideo", "Video đã nhỏ hơn 5MB, không cần nén");
         return inputPath;
     }
-
+    
     if (videoSize > 25 * 1024 * 1024) {
         logError("compressVideo", "Video size exceeds 25MB limit");
         throw new Error("Video size exceeds 25MB limit");
@@ -110,10 +110,10 @@ const compressVideo = async (inputPath, outputPath) => {
                     logInfo("compressVideo", "Finished encoding");
                     unlinkFile(inputPath);
                     
-                    if (newSize > 10) {
-                        logInfo("compressVideo", "Video size exceeds 10MB");
+                    if (newSize > 5) {
+                        logInfo("compressVideo", "Video size exceeds 5MB after compression");
                         unlinkFile(outputPath);
-                        reject(new Error("Video size exceeds 10MB"));
+                        reject(new Error("Video size exceeds 5MB after compression"));
                     } else {
                         resolve(outputPath);
                     }
